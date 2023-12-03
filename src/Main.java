@@ -2,10 +2,11 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Iterator;
 
 public class Main {
     public static void main(String[] args) throws IOException {
-       File file = new File( "./TR_SuperLeague_19_20.txt");
+       File file = new File( "./supermarketData.txt");
 
       //  Scanner sc = new Scanner(file);
       //  System.out.println("sda");
@@ -20,13 +21,28 @@ public class Main {
 
         HashTable linearHash = new HashTable();
 
+     //   linearHash.put(marketCode("11c34489-f95a-45ec-a833-8a329e4d1710"), "adam");
+        
         BufferedReader reader;
-        reader = new BufferedReader(new FileReader("./10_instance.txt.txt"));
+        reader = new BufferedReader(new FileReader("./supermarketData.txt"));
         String line = reader.readLine();
+        //linearHash.put(5, "mal");
+        for (int i = 0; i < 1000; i++) {
+        	System.out.println(marketCode(line));
+        	linearHash.put(line, "adam");
+        	line = reader.readLine();
+		}
+        
+        /*
+        System.out.println(line);
         System.out.println("Hello world!");
         System.out.println((int) '0');
         System.out.println(" ");
         System.out.println(marketCode("11c34489-f95a-45ec-a833-8a329e4d1710"));
+        */
+        
+        linearHash.printHashTable();
+        
     }
 
 
