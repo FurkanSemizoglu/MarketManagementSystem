@@ -1,14 +1,17 @@
-
+import java.util.ArrayList;
 
 // this class is for linear probing
-public class HashTable<K,V> {
+public class HashTable2<K,V> {
 
+		private ArrayList<Product> products;
+	
         private static int TABLE_SIZE = 11;
         private static final int DEFAULT_CAPACITY = 16;
         
         private int currentSize;
         HashEntry<K,V>[] table;
-        public HashTable() {
+        public HashTable2() {
+        	products = null;
             currentSize = 0;            
             table = new HashEntry[TABLE_SIZE];
             for (int i = 0; i < TABLE_SIZE; i++)
@@ -29,12 +32,9 @@ public class HashTable<K,V> {
             while (table[i] != null) {
             	HashEntry<K, V> current = table[i];
             	if(table[i].getKey().equals((String)key)) {
-            		
-            		 while(current != null) {
-                 		
-                 		 System.out.println(current.getKey() + ", " + current.getValue());
-                 		 current = current.getNext();
-                 	}
+            		System.out.println(current.getKey() + ", " + ((ProductList)current.getValue()).getName());
+            		System.out.println("burdan kontrol et \n \n");
+            		((ProductList)current.getValue()).displayProducts();
             		 //return table[i].getValue();
             		return;
             	}
@@ -61,10 +61,12 @@ public class HashTable<K,V> {
         //	System.out.println(((Transaction)value).getName() );
         	checkCapacity();
         	
-        	String name = ((Transaction)value).getName();
-        	String date = ((Transaction)value).getDate() ;      
-        	String product = ((Transaction)value).getProduct();
-          	String transaction = ((Transaction)value).getDate() +"," + ((Transaction)value).getProduct();
+        	String name = ((ProductList)value).getName();
+        	String date = ((ProductList)value).getDate();
+        	String productName = ((ProductList)value).getProductName();
+        	
+        	
+        	//System.out.println(((ProductList)value).getProducts());
         	
         	
         //	int intKey = hashCode((String)key );
@@ -75,10 +77,14 @@ public class HashTable<K,V> {
             // Print "There is a collision !" message to indicate collision and do not insert item
             do {
                 if(table[i] == null) {
-                	 table[i] = new HashEntry<>(key,(V)name);
-                	 HashEntry<K, V> current = table[i];
+                	 table[i] = new HashEntry<>(key,value);
+                	 
+                	 ((ProductList)value).addProduct(date,productName );
+                	 
+                //	 System.out.println("heyoo " + ((ProductList)value).getName());
+                //	 HashEntry<K, V> current = table[i];
                 	// current = current.getNext();
-                	 current.setNext( new HashEntry<>((K)date,(V)product));
+                //	 current.setNext( new HashEntry<>((K)date,(V)product));
                 	// current.setValue((V)transaction);
                 	 System.out.println(i);
                     currentSize++;
@@ -86,19 +92,19 @@ public class HashTable<K,V> {
                 }
                 else if (table[i].getKey().equals((String)key) ){
                 
-                	HashEntry<K, V> current = table[i];
-		            while (current.getNext() != null )
-		            {
-		                // Search for the key in the chain
-		                current = current.getNext();
-		            }
+                	ProductList tmpList = (ProductList)table[i].getValue(); 
+           //     	System.out.println("buraya geliyo mu ya");
+                	
+                	tmpList.addProduct(date, productName);
+               // 	HashEntry<K, V> current = table[i];
+		            
 		            // if there is a new entry
 		            
-               	  //  table[i] = new HashEntry<>(key, value);
+               //	    table[i] = new HashEntry<>(key, value);
 
                	    // think about setNext
                	    
-               	    current.setNext( new HashEntry<>((K)date,(V)product));
+               	    
                	   // current.setValue((V) transaction);
                     return;
                 }
@@ -161,7 +167,7 @@ public class HashTable<K,V> {
             System.out.println("\nHash Table: ");
             for (int i = 0; i < TABLE_SIZE; i++)
                 if (table[i] != null) {
-                    System.out.println(table[i].getKey() + " " + table[i].getValue());
+                    System.out.println(table[i].getKey() + " " + ((ProductList)table[i].getValue()).getName());
                 }
             System.out.println();
         }
