@@ -7,12 +7,7 @@ public class HashEntry<K,V> {
     V value;
 	private HashEntry<K, V> next;
 
-    /*
-    HashEntry(String key, String value) {
-        this.key = key;
-        this.value = value;
-    }
-    */
+   
     public HashEntry(K key, V value) {
         this.key = key;
         this.value = value;
@@ -36,13 +31,5 @@ public class HashEntry<K,V> {
 	public void setNext(HashEntry<K, V> next) {
 		this.next = next;
 	}	
-/*
-    public String getKey() {
-        return key;
-    }
 
-    public String getValue() {
-        return value;
-    }
-    */
 }

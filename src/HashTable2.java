@@ -5,7 +5,7 @@ public class HashTable2<K,V> {
 
 		private ArrayList<Product> products;
 	
-        private static int TABLE_SIZE = 11;
+        private static int TABLE_SIZE = 1049;
         private static final int DEFAULT_CAPACITY = 16;
         
         private int currentSize;
@@ -35,7 +35,7 @@ public class HashTable2<K,V> {
             		System.out.println(current.getKey() + ", " + ((ProductList)current.getValue()).getName());
             		System.out.println("burdan kontrol et \n \n");
             		((ProductList)current.getValue()).displayProducts();
-            		 //return table[i].getValue();
+            		
             		return;
             	}
             	

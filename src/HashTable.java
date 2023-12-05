@@ -3,7 +3,7 @@
 // this class is for linear probing
 public class HashTable<K,V> {
 
-        private static int TABLE_SIZE = 11;
+        private static int TABLE_SIZE = 1049;
         private static final int DEFAULT_CAPACITY = 16;
         
         private int currentSize;
