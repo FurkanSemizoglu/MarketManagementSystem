@@ -6,18 +6,24 @@ public class HashTableDH2<K,V> {
 
 	private ArrayList<Product> products;
 
-    private static int TABLE_SIZE = 11;
+    private static int TABLE_SIZE = 1049;
     private static final int DEFAULT_CAPACITY = 16;
-    private static final double LOAD_FACTOR =  0.5;
+    private static  double LOAD_FACTOR =  0.5;
     
     private int currentSize;
     HashEntry<K,V>[] table;
     private int primeSize;
+    private int hashFunctionInput;
     
-    public HashTableDH2() {
+    public HashTableDH2(int hashFunctionInput , int loadFactor) {
     	products = null;
         currentSize = 0;            
         table = new HashEntry[TABLE_SIZE];
+        this.hashFunctionInput = hashFunctionInput;
+        
+        if(loadFactor == 1) LOAD_FACTOR = 0.5;
+        else LOAD_FACTOR = 0.8;
+        
         for (int i = 0; i < TABLE_SIZE; i++)
             table[i] = null;
         
@@ -57,17 +63,21 @@ public class HashTableDH2<K,V> {
         int i = (int)myhash1( key );
 	    int hash2 =(int) hash2( key );        
 	     
+	    boolean isFound = false;
         while (table[i] != null) {
         	HashEntry<K, V> current = table[i];
         	if(table[i].getKey().equals((String)key)) {
-        		System.out.println(current.getKey() + ", " + ((ProductList)current.getValue()).getName());
-        		System.out.println("burdan kontrol et \n \n");
+        		System.out.println(((ProductList) current.getValue()).getProductsSize()+ " transactions found for  " + ((ProductList)current.getValue()).getName()); 
+        		
+        		
         		((ProductList)current.getValue()).displayProducts();
-        		System.out.println(" araa \n");
+        		isFound = true;
         		return;
         	}
         	i = (i + hash2) % TABLE_SIZE;
         }
+        
+        if(isFound == false) System.out.println("customer not found");
 
         return ;
    
@@ -82,11 +92,8 @@ public class HashTableDH2<K,V> {
     	String productName = ((ProductList)value).getProductName();
     	
     	int hash1 = (int)myhash1( key );
-	    int hash2 =(int) hash2( key );        
+	    int hash2 =(int) hash2( key );    
 	     
-	    System.out.println(hash1);
-	    System.out.println(hash2);
-	       
         int tmpHash = hashFunction(key);// Calculate hash value
 
         int i = hash1;
@@ -94,7 +101,7 @@ public class HashTableDH2<K,V> {
         do {
             if(table[i] == null) {
             	table[i] = new HashEntry<>(key,value);        	 
-            	System.out.println(name + " added  " + i + " bu tabıla ");
+          //  	System.out.println(name + " added  " + i + " bu tabıla ");
             	((ProductList)value).addProduct(date,productName );
                 currentSize++;
                 return;
@@ -105,17 +112,13 @@ public class HashTableDH2<K,V> {
             	tmpList.addProduct(date, productName);         
                 return;
             }
-            else {
-            	System.out.println(table[i].getKey()) ;
-            	System.out.println(key) ;
-                System.out.println(i + " there is a collision : " + key + " we will make a double hashing");
-                System.out.println(hash2) ;
-                System.out.println("prime size " + primeSize );
+            else {          
+          //      System.out.println(i + " there is a collision : " + key + " we will make a double hashing");
             }
             
             i = (i + hash2) % TABLE_SIZE;
-
-        }while (i != tmpHash);
+        
+       }while (i != tmpHash);
     }
 
 
@@ -199,45 +202,90 @@ public class HashTableDH2<K,V> {
             hash1 += hash2;
             hash1 %= TABLE_SIZE;
         }
+        
+        System.out.println(((ProductList) (table[hash1].getValue())).getName() + " removed ");
         table[hash1] = null;
         currentSize--;
     }
     
-    // mine code
-    public long hashCode (K code) {
-    	  String tmpCode = (String)code;
-          char[] chars = new char[tmpCode.length()];
+    public int hashCode2 (K code) {
+    	String tmpCode = (String)code;
+    	  char[] chars = new char[tmpCode.length()];
 
-          int lenOfKey = tmpCode.length();
-
-          long resultCode = 0;
-          for (int i = 0; i < tmpCode.length(); i++) {
-              chars[i] = tmpCode.charAt(i);
-
-              int letter = 0;
-              if (tmpCode.charAt(i) != '-' && tmpCode.charAt(i) != '0') {
-
-                  // sayı olma durumu
-                  if ((int) tmpCode.charAt(i) >= 49 && (int) tmpCode.charAt(i) < 58)
-                      letter = ((int) tmpCode.charAt(i) - 48);
-                  else
-                      letter =  ((int) tmpCode.charAt(i) - 96); // situation of being letter
-              }
-             
-           
-            
-              lenOfKey -= 1;
-              resultCode += (long) (letter * Math.pow(7, lenOfKey));          
-
+          int resultCode = 0 ;
+          for (int i = 0; i <  tmpCode.length(); i++) {
+                 chars[i] =  tmpCode.charAt(i);
+                 
+                 int letter = 0; 
+                 if( tmpCode.charAt(i) != '-'  && tmpCode.charAt(i) != '0' ) {
+              	   if((int)tmpCode.charAt(i) >= 49 && (int) tmpCode.charAt(i) < 58)
+              		   letter = (int)tmpCode.charAt(i) - 48;
+              	   else letter = (int) tmpCode.charAt(i)- 96;
+                 }
+               
+                 resultCode += letter;
+                
           }
-
+          
           return resultCode;
     }
     
+   
+    // mine code
+    public long hashCode (K code) {
+    	if(hashFunctionInput == 1) {
+    		String tmpCode = (String)code;
+        	  char[] chars = new char[tmpCode.length()];
 
-    
+              int resultCode = 0 ;
+              for (int i = 0; i <  tmpCode.length(); i++) {
+                     chars[i] =  tmpCode.charAt(i);
+                     
+                     int letter = 0; 
+                     if( tmpCode.charAt(i) != '-'  && tmpCode.charAt(i) != '0' ) {
+                  	   if((int)tmpCode.charAt(i) >= 49 && (int) tmpCode.charAt(i) < 58)
+                  		   letter = (int)tmpCode.charAt(i) - 48;
+                  	   else letter = (int) tmpCode.charAt(i)- 96;
+                     }
+                   
+                     resultCode += letter;
+                    
+              }
+              
+              return resultCode;
+    	}
+    	else {
+    		String tmpCode = (String)code;
+            char[] chars = new char[tmpCode.length()];
 
+            int lenOfKey = tmpCode.length();
 
+            long resultCode = 0;
+            for (int i = 0; i < tmpCode.length(); i++) {
+                chars[i] = tmpCode.charAt(i);
+
+                int letter = 0;
+                if (tmpCode.charAt(i) != '-' && tmpCode.charAt(i) != '0') {
+
+                    // sayı olma durumu
+                    if ((int) tmpCode.charAt(i) >= 49 && (int) tmpCode.charAt(i) < 58)
+                        letter = ((int) tmpCode.charAt(i) - 48);
+                    else
+                        letter =  ((int) tmpCode.charAt(i) - 96); // situation of being letter
+                }
+               
+             
+              
+                lenOfKey -= 1;
+                resultCode += (long) (letter * Math.pow(7, lenOfKey));          
+
+            }
+
+            return resultCode;
+    	}
+    	
+    	  
+    }
     
 
     public void printHashTable()
@@ -255,24 +303,27 @@ public class HashTableDH2<K,V> {
     	double proportion = currentSize / TABLE_SIZE ;
     	if (proportion >= 0.5) {
     		System.out.println("load factor is full !!!");
-    		resize();
+    		resize2();
     	}
     }
     
     public void resize2 () {
-    		int newCapacity = TABLE_SIZE * 2;
+    		int newCapacity = (TABLE_SIZE *2) -1;
+    		newCapacity = getNextPrime(newCapacity);
     	    HashEntry<K, V>[] newTable = new HashEntry[newCapacity];
 
+    	    
+    	   
     	    // Rehash all existing key-value pairs
     	    for (int i = 0; i < TABLE_SIZE; i++) {
     	        if (table[i] != null) {
     	            K key = table[i].getKey();
     	            V value = table[i].getValue();
-    	            int newIndex = hashFunction(key) % newCapacity;
-
+    	            int newIndex = (int) (myhash1(key) % newCapacity);
+    	            int hash2 = (int) hash2(key);
     	            // Linear probing for collision resolution in the new array
     	            while (newTable[newIndex] != null) {
-    	                newIndex = (newIndex + 1) % newCapacity;
+    	                newIndex = (newIndex + hash2) % newCapacity;
     	            }
 
     	            newTable[newIndex] = new HashEntry<>(key, value);

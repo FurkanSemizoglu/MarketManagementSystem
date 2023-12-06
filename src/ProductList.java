@@ -15,8 +15,11 @@ public class ProductList {
 	 }
 	 
 	 
-	 
-	 public String getDate() {
+	
+
+
+
+	public String getDate() {
 		return date;
 	}
 
@@ -56,7 +59,9 @@ public class ProductList {
 		return products;
 	}
 
-
+	public int getProductsSize() {
+		return products.size();
+	}
 
 	public void setProducts(ArrayList<Product> products) {
 		this.products = products;

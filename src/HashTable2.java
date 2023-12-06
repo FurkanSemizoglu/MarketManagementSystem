@@ -7,22 +7,38 @@ public class HashTable2<K,V> {
 	
         private static int TABLE_SIZE = 1049;
         private static final int DEFAULT_CAPACITY = 16;
+        private static double LOAD_FACTOR =  0.5;
         
         private int currentSize;
+        private int hashFunctionInput;
         HashEntry<K,V>[] table;
-        public HashTable2() {
+        public HashTable2(int hashFunctionInput , int loadFactor) {
         	products = null;
-            currentSize = 0;            
+            currentSize = 0;   
+            this.hashFunctionInput = hashFunctionInput;
             table = new HashEntry[TABLE_SIZE];
+            
+            if(loadFactor == 1) LOAD_FACTOR = 0.5;
+            else LOAD_FACTOR = 0.8;
+            
             for (int i = 0; i < TABLE_SIZE; i++)
                 table[i] = null;
         }
-
+        /*
+         * 
         public int hashFunction(K key) {
 
         	
-            return hashCode(key) % TABLE_SIZE;
-
+            return (int)(hashCode(key) % TABLE_SIZE);
+           
+        }
+        */
+        public int hashFunction(K key) {       	
+            
+            if (hashCode(key) % TABLE_SIZE < 0)
+            	return (int) ((hashCode(key) % TABLE_SIZE) + TABLE_SIZE);
+            else
+            	return  (int) (hashCode(key) % TABLE_SIZE);
         }
         
         public void getValue(K key) {
@@ -39,22 +55,12 @@ public class HashTable2<K,V> {
             		return;
             	}
             	
-            	
-            	/*
-                if (table[i].equals(key))
-                    return table[i].getValue();
-                    */
+            
                 i = (i + 1) % TABLE_SIZE;
             }
 
             return ;
-            /*
-            if (table[i] == null)
-                return -1;
-            else
-                return table[i].getValue();
-
-             */
+      
         }
         public void put(K key, V value) {
 
@@ -80,13 +86,7 @@ public class HashTable2<K,V> {
                 	 table[i] = new HashEntry<>(key,value);
                 	 
                 	 ((ProductList)value).addProduct(date,productName );
-                	 
-                //	 System.out.println("heyoo " + ((ProductList)value).getName());
-                //	 HashEntry<K, V> current = table[i];
-                	// current = current.getNext();
-                //	 current.setNext( new HashEntry<>((K)date,(V)product));
-                	// current.setValue((V)transaction);
-                	 System.out.println(i);
+
                     currentSize++;
                     return;
                 }
@@ -109,9 +109,9 @@ public class HashTable2<K,V> {
                     return;
                 }
                 else {
-                	System.out.println(table[i].getKey()) ;
-                	System.out.println(key) ;
-                    System.out.println(i + "there is a collision : " + key + " we will make a linear probing");
+              //  	System.out.println(table[i].getKey()) ;
+              //  	System.out.println(key) ;
+              //      System.out.println(i + "there is a collision : " + key + " we will make a linear probing");
                 }
 
                 i = (i + 1) % TABLE_SIZE;
@@ -139,26 +139,71 @@ public class HashTable2<K,V> {
         }
         
         // mine code
-        public int hashCode (K code) {
-        	String tmpCode = (String)code;
-        	  char[] chars = new char[tmpCode.length()];
+        public long hashCode (K code) {
+        	
+        	if(hashFunctionInput == 1) {
+        		String tmpCode = (String)code;
+          	  char[] chars = new char[tmpCode.length()];
 
-              int resultCode = 0 ;
-              for (int i = 0; i <  tmpCode.length(); i++) {
-                     chars[i] =  tmpCode.charAt(i);
+                int resultCode = 0 ;
+                for (int i = 0; i <  tmpCode.length(); i++) {
+                       chars[i] =  tmpCode.charAt(i);
+                       
+                       int letter = 0; 
+                       if( tmpCode.charAt(i) != '-'  && tmpCode.charAt(i) != '0' ) {
+                    	   if((int)tmpCode.charAt(i) >= 49 && (int) tmpCode.charAt(i) < 58)
+                    		   letter = (int)tmpCode.charAt(i) - 48;
+                    	   else letter = (int) tmpCode.charAt(i)- 96;
+                       }
                      
-                     int letter = 0; 
-                     if( tmpCode.charAt(i) != '-'  && tmpCode.charAt(i) != '0' ) {
-                  	   if((int)tmpCode.charAt(i) >= 49 && (int) tmpCode.charAt(i) < 58)
-                  		   letter = (int)tmpCode.charAt(i) - 48;
-                  	   else letter = (int) tmpCode.charAt(i)- 96;
-                     }
+                       resultCode += letter;
+                      
+                }
+                
+                return resultCode;
+        	}
+        	else {
+        		  String tmpCode = (String)code;
+                  char[] chars = new char[tmpCode.length()];
+
+                  int lenOfKey = tmpCode.length();
+
+                  long resultCode = 0;
+                  for (int i = 0; i < tmpCode.length(); i++) {
+                      chars[i] = tmpCode.charAt(i);
+
+                      int letter = 0;
+                      if (tmpCode.charAt(i) != '-' && tmpCode.charAt(i) != '0') {
+
+                          // sayı olma durumu
+                          if ((int) tmpCode.charAt(i) >= 49 && (int) tmpCode.charAt(i) < 58)
+                              letter = ((int) tmpCode.charAt(i) - 48);
+                          else
+                              letter =  ((int) tmpCode.charAt(i) - 96); // situation of being letter
+                          
+                    //      System.out.println(letter);
+                          lenOfKey -= 1;
+                   //       System.out.println(Math.pow(7, lenOfKey));
+                         
+
+                          resultCode += (long) (letter * (Math.pow(7, lenOfKey))); 
+                    //      System.out.println("result " +resultCode);
+                      }
+                      else if( tmpCode.charAt(i) == '0') {
+                  //  	  System.out.println(letter);
+                          lenOfKey -= 1;
+                          resultCode += (long) (letter * (Math.pow(7, lenOfKey))); 
+                      }
+                     
                    
-                     resultCode += letter;
                     
-              }
-              
-              return resultCode;
+                               
+
+                  }
+            //      System.out.println(resultCode);
+                  return resultCode;
+        	}
+        	
         }
 
 
@@ -173,10 +218,13 @@ public class HashTable2<K,V> {
         }
         
         public void checkCapacity() {
-        	if (currentSize == TABLE_SIZE) {
-        		System.out.println("capacity is full !!!");
+        	
+        	double proportion = currentSize / TABLE_SIZE ;
+        	if (proportion >= 0.5) {
+        		System.out.println("load factor is full !!!");
         		resize();
         	}
+        	
         }
         
         public void resize () {
