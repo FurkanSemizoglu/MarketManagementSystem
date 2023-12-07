@@ -1,7 +1,6 @@
 
 
-public class HashEntry<K,V> {
- 
+public class HashEntry<K,V> { 
 
     K key;
     V value;

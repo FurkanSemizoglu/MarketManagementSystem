@@ -14,11 +14,6 @@ public class ProductList {
 	        this.products = new ArrayList<Product>();
 	 }
 	 
-	 
-	
-
-
-
 	public String getDate() {
 		return date;
 	}

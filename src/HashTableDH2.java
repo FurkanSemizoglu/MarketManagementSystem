@@ -11,6 +11,9 @@ public class HashTableDH2<K,V> {
     private static  double LOAD_FACTOR =  0.5;
     
     private int currentSize;
+    private int customerFounded;
+    private long collisionCount;
+    
     HashEntry<K,V>[] table;
     private int primeSize;
     private int hashFunctionInput;
@@ -18,6 +21,8 @@ public class HashTableDH2<K,V> {
     public HashTableDH2(int hashFunctionInput , int loadFactor) {
     	products = null;
         currentSize = 0;            
+        collisionCount = 0;
+        customerFounded = 0;
         table = new HashEntry[TABLE_SIZE];
         this.hashFunctionInput = hashFunctionInput;
         
@@ -52,7 +57,7 @@ public class HashTableDH2<K,V> {
     	
     	long hashVal = 7 - ( hashCode(key) % 7);
     	if (hashVal < 0)
-    		hashVal += TABLE_SIZE;
+    		hashVal = (hashCode(key) % TABLE_SIZE) + TABLE_SIZE;
     	return hashVal; 
     }
   
@@ -67,9 +72,7 @@ public class HashTableDH2<K,V> {
         while (table[i] != null) {
         	HashEntry<K, V> current = table[i];
         	if(table[i].getKey().equals((String)key)) {
-        		System.out.println(((ProductList) current.getValue()).getProductsSize()+ " transactions found for  " + ((ProductList)current.getValue()).getName()); 
-        		
-        		
+        		System.out.println(((ProductList) current.getValue()).getProductsSize()+ " transactions found for  " + ((ProductList)current.getValue()).getName());       		        		
         		((ProductList)current.getValue()).displayProducts();
         		isFound = true;
         		return;
@@ -82,9 +85,33 @@ public class HashTableDH2<K,V> {
         return ;
    
     }
-    public void put(K key, V value) {
+    
 
-   
+    
+    public void find(K key) {
+    	int i = (int)myhash1( key );
+ 	    int hash2 =(int) hash2( key );        
+ 	    customerFounded 	=0;
+ 	    boolean isFound = false;
+         while (table[i] != null) {
+         
+         	if(table[i].getKey().equals((String)key)) {         		
+         		isFound = true;
+         		customerFounded ++;
+         		System.out.println(customerFounded + " customer founded");
+         		return;
+         	}
+         	i = (i + hash2) % TABLE_SIZE;
+         }
+         
+         
+         
+      //   if(isFound == false) System.out.println("customer not found");
+
+         return ;
+    }
+    
+    public void put(K key, V value) {   
     	checkCapacity();
     	
     	String name = ((ProductList)value).getName();
@@ -100,24 +127,21 @@ public class HashTableDH2<K,V> {
      
         do {
             if(table[i] == null) {
-            	table[i] = new HashEntry<>(key,value);        	 
-          //  	System.out.println(name + " added  " + i + " bu tabıla ");
+            	table[i] = new HashEntry<>(key,value);     	 
             	((ProductList)value).addProduct(date,productName );
                 currentSize++;
                 return;
             }
-            else if (table[i].getKey().equals((String)key) ){
-            
+            else if (table[i].getKey().equals((String)key) ){            
             	ProductList tmpList = (ProductList)table[i].getValue(); 
             	tmpList.addProduct(date, productName);         
                 return;
             }
-            else {          
+            else {   
+            	  collisionCount++;
           //      System.out.println(i + " there is a collision : " + key + " we will make a double hashing");
-            }
-            
-            i = (i + hash2) % TABLE_SIZE;
-        
+            }            
+            i = (i + hash2) % TABLE_SIZE;        
        }while (i != tmpHash);
     }
 
@@ -208,28 +232,7 @@ public class HashTableDH2<K,V> {
         currentSize--;
     }
     
-    public int hashCode2 (K code) {
-    	String tmpCode = (String)code;
-    	  char[] chars = new char[tmpCode.length()];
-
-          int resultCode = 0 ;
-          for (int i = 0; i <  tmpCode.length(); i++) {
-                 chars[i] =  tmpCode.charAt(i);
-                 
-                 int letter = 0; 
-                 if( tmpCode.charAt(i) != '-'  && tmpCode.charAt(i) != '0' ) {
-              	   if((int)tmpCode.charAt(i) >= 49 && (int) tmpCode.charAt(i) < 58)
-              		   letter = (int)tmpCode.charAt(i) - 48;
-              	   else letter = (int) tmpCode.charAt(i)- 96;
-                 }
-               
-                 resultCode += letter;
-                
-          }
-          
-          return resultCode;
-    }
-    
+ 
    
     // mine code
     public long hashCode (K code) {
@@ -255,9 +258,8 @@ public class HashTableDH2<K,V> {
               return resultCode;
     	}
     	else {
-    		String tmpCode = (String)code;
-            char[] chars = new char[tmpCode.length()];
-
+    		String tmpCode = (String)code;         
+    		char[] chars = new char[tmpCode.length()];
             int lenOfKey = tmpCode.length();
 
             long resultCode = 0;
@@ -296,19 +298,20 @@ public class HashTableDH2<K,V> {
                 System.out.println(table[i].getKey() + " " + ((ProductList)table[i].getValue()).getName());
             }
         System.out.println();
+        System.out.println(collisionCount  + " collision founded");
     }
     
     public void checkCapacity() {
     	
     	double proportion = currentSize / TABLE_SIZE ;
-    	if (proportion >= 0.5) {
+    	if (proportion >= LOAD_FACTOR) {
     		System.out.println("load factor is full !!!");
-    		resize2();
+    		resize();
     	}
     }
     
-    public void resize2 () {
-    		int newCapacity = (TABLE_SIZE *2) -1;
+    public void resize () {
+    		int newCapacity = (TABLE_SIZE *2);
     		newCapacity = getNextPrime(newCapacity);
     	    HashEntry<K, V>[] newTable = new HashEntry[newCapacity];
 
@@ -336,22 +339,6 @@ public class HashTableDH2<K,V> {
     	
     }
     
-    
-    private void resize() {
-        int oldSize = (TABLE_SIZE *2) -1;
-        TABLE_SIZE = getNextPrime(oldSize); // Update TABLE_SIZE to the new prime number
 
-        HashEntry[] oldTable = Arrays.copyOf(table, oldSize);
-        table = new HashEntry[TABLE_SIZE];
-
-        currentSize = 0; // Reset size as we will re-insert all key-value pairs
-
-        // Rehash and insert all key-value pairs from the old table to the new table
-        for (int i = 0; i < oldSize; i++) {
-            if (oldTable[i] != null) {
-                put((K)oldTable[i].key, (V)oldTable[i].value);
-            }
-        }
-    }
 
 }
